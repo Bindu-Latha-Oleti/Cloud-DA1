@@ -6,43 +6,43 @@
   <title>COVID-19 Tracker</title>
   <style>
     .container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-.stat {
-  background-color: #efefef;
-  padding: 15px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  font-size: 18px;
-  text-align: center;
-}
+    .stat {
+      background-color: #efefef;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      text-align: center;
+    }
 
-button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
-}
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
 
-button:hover {
-  background-color: #0056b3;
-}
+    button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
@@ -56,132 +56,99 @@ button:hover {
   </div>
 
   <script>
+    const apiKey = '935f4634c3msh2489f6743c71a1bp1eb1b2jsndd711a69a4ac';
+    const headers = {
+      'X-RapidAPI-Key': apiKey,
+      'X-RapidAPI-Host': 'covid-19-statistics.p.rapidapi.com',
+    };
 
-const apiKey = '935f4634c3msh2489f6743c71a1bp1eb1b2jsndd711a69a4ac'; 
-const globalApiUrl = 'https://covid-19-statistics.p.rapidapi.com/reports/total?date=2024-11-07';
-const indiaApiUrl = 'https://covid-19-statistics.p.rapidapi.com/reports?iso=IND';
-const vaccinationApiUrl = 'https://covid-19-statistics.p.rapidapi.com/vaccination-status';
-const hospitalResourcesApiUrl = 'https://covid-19-statistics.p.rapidapi.com/hospitals/resources';
+    // API Endpoints
+    const globalApiUrl = 'https://covid-19-statistics.p.rapidapi.com/reports/total';
+    const indiaApiUrl = 'https://covid-19-statistics.p.rapidapi.com/reports?iso=IND';
+    const vaccinationApiUrl = 'https://covid-19-vaccine.p.rapidapi.com/vaccines';
+    const hospitalResourcesApiUrl = 'https://covid-19-hospitals.p.rapidapi.com/resources';
 
-// Fetch global COVID-19 data
-async function fetchGlobalData() {
-  try {
-    const response = await fetch(globalApiUrl, {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': '935f4634c3msh2489f6743c71a1bp1eb1b2jsndd711a69a4ac',
-        'X-RapidAPI-Host': 'covid-19-statistics.p.rapidapi.com', // Replace with your actual Host value
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Fetch global COVID-19 data
+    async function fetchGlobalData() {
+      try {
+        const response = await fetch(globalApiUrl, { headers });
+        const result = await response.json();
+        const { data } = result;
+        document.getElementById('global-cases').textContent = 
+          `Global cases: Confirmed - ${data.confirmed}, Deaths - ${data.deaths}, Recovered - ${data.recovered}`;
+      } catch (error) {
+        console.error('Error fetching global data:', error);
+        document.getElementById('global-cases').textContent = 'Error fetching global data.';
+      }
     }
 
-    const data = await response.json();
-    console.log('Global Data:', data);
-
-    document.getElementById('global-cases').textContent = `Global cases: ${data.totalCases}`;
-  } catch (error) {
-    console.error('Error fetching global data:', error);
-    document.getElementById('global-cases').textContent = 'Error fetching global data.';
-  }
-}
-
-// Fetch India COVID-19 data
-async function fetchIndiaData() {
-  try {
-    const response = await fetch(indiaApiUrl, {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': '935f4634c3msh2489f6743c71a1bp1eb1b2jsndd711a69a4ac',
-        'X-RapidAPI-Host': 'covid-19-statistics.p.rapidapi.com', 
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Fetch India COVID-19 data
+    async function fetchIndiaData() {
+      try {
+        const response = await fetch(indiaApiUrl, { headers });
+        const result = await response.json();
+        const indiaData = result.data[0];
+        document.getElementById('india-cases').textContent = 
+          `India cases: Confirmed - ${indiaData.confirmed}, Deaths - ${indiaData.deaths}, Recovered - ${indiaData.recovered}`;
+      } catch (error) {
+        console.error('Error fetching India data:', error);
+        document.getElementById('india-cases').textContent = 'Error fetching India data.';
+      }
     }
 
-    const data = await response.json();
-    console.log('India Data:', data);
+    // Fetch vaccination status data
+    async function fetchVaccinationData() {
+      try {
+        const response = await fetch(vaccinationApiUrl, {
+          headers: {
+            'X-RapidAPI-Key': apiKey,
+            'X-RapidAPI-Host': 'covid-19-vaccine.p.rapidapi.com'
+          }
+        });
+        const result = await response.json();
+        // Assuming 'data' contains vaccination statistics, adapt if structure differs
+        const vaccinationData = result[0]; // Adjust according to actual API structure
+        document.getElementById('vaccination-progress').textContent = 
+          `Vaccination progress: ${vaccinationData.total_vaccinations} doses administered, ${vaccinationData.people_vaccinated} people fully vaccinated.`;
+      } catch (error) {
+        console.error('Error fetching vaccination data:', error);
+        document.getElementById('vaccination-progress').textContent = 'Error fetching vaccination data.';
+      }
+    }
 
-    // Extract and update the India cases in the DOM
-    const indiaCases = data.totalCases;
-document.getElementById('india-cases').textContent = `India cases: ${indiaCases}`;
-} catch (error) {
-  console.error('Error fetching India data:', error);
-  document.getElementById('india-cases').textContent = 'Error fetching India data.';
-}
-}
+    // Fetch hospital resources data
+    async function fetchHospitalResources() {
+      try {
+        const response = await fetch(hospitalResourcesApiUrl, {
+          headers: {
+            'X-RapidAPI-Key': apiKey,
+            'X-RapidAPI-Host': 'covid-19-hospitals.p.rapidapi.com'
+          }
+        });
+        const result = await response.json();
+        // Assuming the API returns a list of resources by region
+        const hospitalData = result.data;
+        document.getElementById('hospital-resources').textContent = 
+          `Hospital resources: Beds - ${hospitalData.beds_available}, Ventilators - ${hospitalData.ventilators_available}, ICU - ${hospitalData.icu_beds_available}`;
+      } catch (error) {
+        console.error('Error fetching hospital resources data:', error);
+        document.getElementById('hospital-resources').textContent = 'Error fetching hospital resources data.';
+      }
+    }
 
-// Fetch vaccination status data
-async function fetchVaccinationData() {
-try {
-  const response = await fetch(vaccinationApiUrl, {
-    method: 'GET',
-    headers: {
-      'X-RapidAPI-Key':'935f4634c3msh2489f6743c71a1bp1eb1b2jsndd711a69a4ac',
-      'X-RapidAPI-Host': 'covid-19-statistics.p.rapidapi.com', // Replace with your actual Host value
-    },
-  });
+    // Fetch all data
+    async function fetchData() {
+      await fetchGlobalData();
+      await fetchIndiaData();
+      await fetchVaccinationData();
+      await fetchHospitalResources();
+    }
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
+    // Event listener for the update button
+    document.getElementById('update-data').addEventListener('click', fetchData);
 
-  const data = await response.json();
-  console.log('Vaccination Data:', data);
-
-  // Extract and update the vaccination progress in the DOM
-  const vaccinationProgress = data.progress;
-  document.getElementById('vaccination-progress').textContent = `Vaccination progress: ${vaccinationProgress}`;
-} catch (error) {
-  console.error('Error fetching vaccination data:', error);
-  document.getElementById('vaccination-progress').textContent = 'Error fetching vaccination data.';
-}
-}
-
-// Fetch hospital resources data
-async function fetchHospitalResources() {
-try {
-  const response = await fetch(hospitalResourcesApiUrl, {
-    method: 'GET',
-    headers: {
-      'X-RapidAPI-Key': '935f4634c3msh2489f6743c71a1bp1eb1b2jsndd711a69a4ac',
-      'X-RapidAPI-Host': 'covid-19-statistics.p.rapidapi.com', // Replace with your actual Host value
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-  console.log('Hospital Resources Data:', data);
-
-  // Extract and update the hospital resources in the DOM
-  const hospitalResources = data.resources;
-  document.getElementById('hospital-resources').textContent = `Hospital resources: ${hospitalResources}`;
-} catch (error) {
-  console.error('Error fetching hospital resources data:', error);
-  document.getElementById('hospital-resources').textContent = 'Error fetching hospital resources data.';
-}
-}
-
-// Fetch all data
-async function fetchData() {
-  await fetchGlobalData();
-  await fetchIndiaData();
-  await fetchVaccinationData();
-  await fetchHospitalResources();
-}
-
-// Event listener for the update button
-document.getElementById('update-data').addEventListener('click', fetchData);
-
-// Fetch data when the page loads
-fetchData();
-</script>
+    // Fetch data when the page loads
+    fetchData();
+  </script>
 </body>
 </html>
